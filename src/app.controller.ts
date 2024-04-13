@@ -1,22 +1,63 @@
 import {
   Controller,
+  Get,
+  HttpCode,
   HttpStatus,
+  NotFoundException,
+  Param,
   ParseFilePipeBuilder,
   Post,
-  Get,
+  Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { AppService } from './app.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { PrismaService } from './prisma.service';
+import { v4 as uuidv4 } from 'uuid';
+import * as path from 'path';
+import { diskStorage } from 'multer';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly prismaService: PrismaService) {}
+
+  @Get(':id')
+  async getFile(@Param('id') id: string) {
+    const file = await this.prismaService.getPrisma().image.findFirst({
+      where: {
+        id: Number(id),
+      },
+    });
+
+    console.log(file);
+
+    if (!file) {
+      throw new NotFoundException('File not found');
+    }
+
+    return {
+      status: 'OK',
+      data: {
+        image: process.env.BASE_URL + '/uploads/' + file.fileName,
+      },
+    };
+  }
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
-  uploadFile(
+  @HttpCode(201)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const uuid = uuidv4();
+          const ext = path.extname(file.originalname);
+          cb(null, uuid + ext);
+        },
+      }),
+    }),
+  )
+  async uploadFile(
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addFileTypeValidator({
@@ -31,8 +72,21 @@ export class AppController {
     )
     file: Express.Multer.File,
   ) {
-    console.log(file);
+    const savedFile = await this.prismaService.getPrisma().image.create({
+      data: {
+        fileName: file.filename,
+      },
+    });
 
-    return file;
+    if (!savedFile) {
+      throw new NotFoundException('File not saved');
+    }
+
+    return {
+      status: 'OK',
+      data: {
+        fileName: savedFile.fileName,
+      },
+    };
   }
 }
