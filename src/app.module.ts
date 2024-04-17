@@ -14,6 +14,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads/',
     }),
     ConfigModule.forRoot({ isGlobal: true }),
   ],

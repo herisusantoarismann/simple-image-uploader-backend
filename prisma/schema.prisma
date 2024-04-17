@@ -15,7 +15,10 @@ datasource db {
 
 model Image{
   id Int @default(autoincrement()) @id
-  fileName String @unique
+  slug String @unique
+  name String 
+  type String @db.Char(4)
+  size String @db.Char(5)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }

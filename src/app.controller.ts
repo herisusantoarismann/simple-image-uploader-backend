@@ -21,15 +21,13 @@ import { diskStorage } from 'multer';
 export class AppController {
   constructor(private readonly prismaService: PrismaService) {}
 
-  @Get(':id')
-  async getFile(@Param('id') id: string) {
+  @Get(':slug')
+  async getFile(@Param('slug') slug: string) {
     const file = await this.prismaService.getPrisma().image.findFirst({
       where: {
-        id: Number(id),
+        slug: slug,
       },
     });
-
-    console.log(file);
 
     if (!file) {
       throw new NotFoundException('File not found');
@@ -38,7 +36,10 @@ export class AppController {
     return {
       status: 'OK',
       data: {
-        image: process.env.BASE_URL + '/uploads/' + file.fileName,
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        url: process.env.BASE_URL + '/uploads/' + file.name,
       },
     };
   }
@@ -72,9 +73,16 @@ export class AppController {
     )
     file: Express.Multer.File,
   ) {
+    const uuid = uuidv4();
+    const ext = file.mimetype.split('/')[1]; // Dapatkan ekstensi dari tipe file
+    const fileSizeKB = Math.round(file.size / 1024); // Ubah ukuran file ke kilobyte dan bulatkan
+
     const savedFile = await this.prismaService.getPrisma().image.create({
       data: {
-        fileName: file.filename,
+        slug: uuid,
+        name: file.filename,
+        type: ext.trim(),
+        size: fileSizeKB.toString().trim(),
       },
     });
 
@@ -85,7 +93,10 @@ export class AppController {
     return {
       status: 'OK',
       data: {
-        fileName: savedFile.fileName,
+        fileName: savedFile.name,
+        type: savedFile.type,
+        size: savedFile.size,
+        url: process.env.BASE_URL + '/uploads/' + savedFile.name,
       },
     };
   }
