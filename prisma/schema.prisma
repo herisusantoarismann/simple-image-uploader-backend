@@ -17,8 +17,8 @@ model Image{
   id Int @default(autoincrement()) @id
   slug String @unique
   name String 
-  type String @db.Char(4)
-  size String @db.Char(5)
+  type String @db.VarChar(4)
+  size String @db.VarChar(5)
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 }

@@ -3,8 +3,8 @@ CREATE TABLE "Image" (
     "id" SERIAL NOT NULL,
     "slug" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "type" CHAR(4) NOT NULL,
-    "size" CHAR(5) NOT NULL,
+    "type" VARCHAR(4) NOT NULL,
+    "size" VARCHAR(5) NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 

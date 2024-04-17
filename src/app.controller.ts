@@ -81,8 +81,8 @@ export class AppController {
       data: {
         slug: uuid,
         name: file.filename,
-        type: ext.trim(),
-        size: fileSizeKB.toString().trim(),
+        type: ext,
+        size: fileSizeKB.toString(),
       },
     });
 
@@ -94,6 +94,7 @@ export class AppController {
       status: 'OK',
       data: {
         fileName: savedFile.name,
+        slug: savedFile.slug,
         type: savedFile.type,
         size: savedFile.size,
         url: process.env.BASE_URL + '/uploads/' + savedFile.name,
